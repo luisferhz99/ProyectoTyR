@@ -98,7 +98,7 @@ ZMQ PUB Sink Finalmente, la señal modulada y procesada se envía a través del 
 
 
 CONCLUSIONES
-1. Se logró implementar un sistema funcional de transmisión y recepción de datos utilizando la modulación BPSK. La configuración de los bloques en GNU Radio permitió la correcta modulación, transmisión, recepción y decodificación de los datos.
+1. Se logró implementar un sistema funcional de recepción de datos utilizando la modulación BPSK. La configuración de los bloques en GNU Radio permitió la correcta modulación, transmisión, recepción y decodificación de los datos.
 
 2. El proyecto facilitó una comprensión más profunda de cómo utilizar GNU Radio y las tarjetas LimeSDR para la creación de sistemas de comunicación digital. Aprendimos a configurar y ajustar diversos bloques para asegurar un flujo de datos eficiente y preciso.
 
