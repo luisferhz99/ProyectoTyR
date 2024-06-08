@@ -95,5 +95,15 @@ Throttle El bloque Throttle controla la tasa de procesamiento de los datos, aseg
 
 ZMQ PUB Sink Finalmente, la señal modulada y procesada se envía a través del bloque ZMQ PUB Sink, que transmite los datos utilizando el protocolo ZeroMQ (ZMQ). Este bloque permite la transmisión de datos a través de una red, facilitando la comunicación entre diferentes sistemas o componentes del sistema de comunicación digital. 
 
+
+CONCLUSIONES
+1. Se logró implementar un sistema funcional de transmisión y recepción de datos utilizando la modulación BPSK. La configuración de los bloques en GNU Radio permitió la correcta modulación, transmisión, recepción y decodificación de los datos.
+
+2. El proyecto facilitó una comprensión más profunda de cómo utilizar GNU Radio y las tarjetas LimeSDR para la creación de sistemas de comunicación digital. Aprendimos a configurar y ajustar diversos bloques para asegurar un flujo de datos eficiente y preciso.
+
+3. A lo largo del proyecto, se enfrentaron y resolvieron varios desafíos técnicos, como errores de sintaxis en la definición de variables y la correcta configuración de los bloques de control de tasa y sincronización. Estos desafíos proporcionaron una oportunidad para desarrollar habilidades de resolución de problemas y depuración.
+
+4. Se implementaron métodos para asegurar la integridad de los datos, como el uso de CRC32 para la verificación de la integridad de los paquetes. Esto garantizó que los datos transmitidos y recibidos no estuvieran corruptos, lo cual es crucial en cualquier sistema de comunicación digital.
+
  
 
