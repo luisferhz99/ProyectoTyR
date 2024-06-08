@@ -28,7 +28,10 @@ Para la ejecución de este proyecto se utilizó lo siguiente:
 
          
 
-Receptor 
+RECEPTOR
+![image](https://github.com/luisferhz99/ProyectoTyR/assets/31906680/65019a17-5361-4f68-aded-8313e93a76a0)
+
+El receptor está diseñado para capturar, filtrar, resamplear, sincronizar y decodificar una señal BPSK, recuperando los datos originales transmitidos. Cada bloque en el flujo tiene una función específica, asegurando que los datos se procesen y recuperen de manera eficiente y precisa. Los bloques de sincronización y corrección de fase, como el Symbol Sync y el Costas Loop, son esenciales para la correcta recuperación de los datos, mientras que los bloques de verificación de integridad, como el Stream CRC32, aseguran que los datos no se hayan corrompido durante la transmisión. 
 
 El receptor mostrado en el diagrama de GNU Radio Companion está diseñado para procesar y demodular una señal digital recibida a través de una LimeSDR.  
 
@@ -70,6 +73,34 @@ Los datos etiquetados se reempaquetan en bytes mediante el bloque Repack Bits y 
 
 Adicionalmente, para fines de visualización, los datos se convierten de caracteres sin signo a flotantes usando el bloque UChar to Float, y se muestran en el dominio del tiempo mediante dos bloques QT GUI Time Sink, proporcionando una representación visual detallada de la señal en el dominio del tiempo. 
 
-  
 
-En resumen, este flujo de bloques en GNU Radio implementa un completo receptor de señal digital que incluye recepción, filtrado, resampling, sincronización de símbolos, corrección de fase, decodificación de constelación y diferencial, etiquetado y verificación de integridad de datos, y almacenamiento en un archivo. La interfaz gráfica QT permite visualizar tanto la señal en frecuencia como en el dominio del tiempo, facilitando el análisis y monitoreo del proceso de recepción y demodulación. 
+
+TRANSMISOR 
+![image](https://github.com/luisferhz99/ProyectoTyR/assets/31906680/002b30e2-b797-4a28-9c7a-cb0b8a7595be)
+
+El transmisor está diseñado para leer datos de un archivo, procesarlos y modulados utilizando BPSK, y finalmente transmitirlos a través de una red utilizando ZeroMQ. Cada bloque en el flujo del transmisor tiene una función específica, desde la preparación de los datos hasta su modulación y transmisión, asegurando que los datos se transmiten de manera eficiente y con la integridad preservada. 
+
+El diagrama mostrado representa un transmisor que utiliza modulación BPSK (Binary Phase Shift Keying) para transmitir datos digitales. A continuación se proporciona una explicación detallada de cada bloque y su función dentro del flujo del transmisor. 
+
+Explicación del Transmisor 
+
+EPB: File Source to Tagged Stream El flujo comienza con un bloque de fuente de archivo etiquetado (EPB: File Source to Tagged Stream). Este bloque lee los datos de un archivo de entrada, especificado por el usuario, y convierte estos datos en un flujo etiquetado. La longitud del paquete se define en este bloque, lo que permite que los datos sean segmentados y procesados correctamente a lo largo del flujo de bloques. 
+
+Stream CRC32 El siguiente bloque en el flujo es Stream CRC32, que añade un código de redundancia cíclica (CRC) de 32 bits a cada paquete de datos. Este código CRC se utiliza para verificar la integridad de los datos durante la transmisión y la recepción, asegurando que los datos no hayan sido corrompidos. 
+
+Protocol Formatter El bloque Protocol Formatter formatea los paquetes de datos de acuerdo con un formato específico definido por el usuario. Este formato puede incluir la adición de encabezados y otros datos de control necesarios para la transmisión correcta de los paquetes. 
+
+Tagged Stream Mux El Tagged Stream Mux combina múltiples flujos etiquetados en uno solo. Este bloque es crucial para manejar múltiples tipos de datos o varios flujos de datos simultáneamente, asegurando que cada paquete esté correctamente etiquetado para su posterior procesamiento. 
+
+Constellation Modulator El bloque Constellation Modulator modula los datos utilizando una constelación BPSK. La modulación BPSK asigna bits de datos a fases específicas de la señal portadora, permitiendo la transmisión de datos digitales sobre una portadora analógica. 
+
+FFT Filter El FFT Filter aplica un filtrado en el dominio de la frecuencia a los datos modulados. Este bloque es utilizado para eliminar componentes de frecuencia no deseados y mejorar la calidad de la señal transmitida. 
+
+Fractional Resampler El Fractional Resampler ajusta la tasa de muestreo de la señal. En este caso, la tasa de muestreo se ajusta mediante un cambio fraccionario para asegurar que la señal se transmite a la tasa de muestreo correcta requerida por el hardware de transmisión. 
+
+Throttle El bloque Throttle controla la tasa de procesamiento de los datos, asegurando que el flujo de datos no sea demasiado rápido para ser manejado por el hardware de transmisión o el software. 
+
+ZMQ PUB Sink Finalmente, la señal modulada y procesada se envía a través del bloque ZMQ PUB Sink, que transmite los datos utilizando el protocolo ZeroMQ (ZMQ). Este bloque permite la transmisión de datos a través de una red, facilitando la comunicación entre diferentes sistemas o componentes del sistema de comunicación digital. 
+
+ 
+
