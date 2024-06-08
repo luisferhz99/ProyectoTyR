@@ -1,4 +1,5 @@
 # ProyectoTyR
+GRUPO "B"
 
 INTRODUCCIÓN 
 
