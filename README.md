@@ -33,36 +33,38 @@ RECEPTOR
 
 El receptor está diseñado para capturar, filtrar, resamplear, sincronizar y decodificar una señal BPSK, recuperando los datos originales transmitidos. Cada bloque en el flujo tiene una función específica, asegurando que los datos se procesen y recuperen de manera eficiente y precisa. Los bloques de sincronización y corrección de fase, como el Symbol Sync y el Costas Loop, son esenciales para la correcta recuperación de los datos, mientras que los bloques de verificación de integridad, como el Stream CRC32, aseguran que los datos no se hayan corrompido durante la transmisión. 
 
-El receptor mostrado en el diagrama de GNU Radio Companion está diseñado para procesar y demodular una señal digital recibida a través de una LimeSDR.  
-
-El bloque Options configura el entorno del flujo de trabajo en GNU Radio, estableciendo el lenguaje de salida como Python y especificando la generación de opciones para la interfaz gráfica QT. Seguido a esto, se definen varias variables: `samp_rate` (32k), `freq` (102.4k), `if_freq` (10.24k), y `rx_gain` (62.8m), que son esenciales para configurar parámetros clave del sistema como la tasa de muestreo, frecuencia central, frecuencia intermedia y ganancia de recepción respectivamente. 
+El diagrama presentado representa un receptor para la demodulación y decodificación de una señal BPSK (Binary Phase Shift Keying) utilizando GNU Radio y LimeSDR.
 
 
-El bloque LimeSDR Source (RX) recibe la señal RF a 433 MHz y la muestrea a una tasa de 102.4 kHz. La señal recibida es luego filtrada por un Low Pass Filter, que elimina componentes de alta frecuencia no deseadas utilizando un filtro con una frecuencia de corte de 16 kHz y un ancho de transición de 16 kHz. 
+Explicación del Receptor 
 
+LimeSDR Source (RX) El flujo comienza con el bloque LimeSDR Source (RX), que captura la señal RF (Radiofrecuencia) recibida por la tarjeta LimeSDR. La frecuencia de RF se establece en 435 MHz y la tasa de muestreo en 1.024 MSps. Este bloque convierte la señal RF en una señal de banda base para su procesamiento posterior. 
 
-Para ajustar la tasa de muestreo de la señal, se utiliza un Rational Resampler que interpola y decima la señal. El bloque Throttle controla la velocidad de procesamiento para que coincida con la tasa de muestreo de 48 kHz, asegurando que los datos se procesen a la velocidad correcta. 
+La señal de banda base pasa a través de un Low Pass Filter, que filtra las frecuencias no deseadas y permite el paso de las frecuencias de interés. Este filtro tiene una frecuencia de corte de 10 kHz y un ancho de transición de 1.6 kHz, utilizando una ventana Hamming con un parámetro beta de 6.76. El propósito de este filtro es limpiar la señal y eliminar el ruido fuera de la banda de interés. 
 
+A continuación, la señal pasa por un Rational Resampler, que ajusta la tasa de muestreo de la señal. En este caso, la señal se interpola por 1 y se decima por 16, ajustando la tasa de muestreo para que coincida con la tasa de procesamiento requerida por los bloques posteriores. 
 
-El Automatic Gain Control (AGC) ajusta automáticamente la ganancia de la señal para mantener un nivel constante. Este es seguido por el bloque FLL Band-Edge, que realiza la estimación de frecuencia y sincronización de la señal, utilizando parámetros como muestras por símbolo (4), factor de rolloff del filtro (350m), y ancho de banda del bucle (62.8m). 
+El bloque Throttle controla la tasa de procesamiento de los datos, limitando la velocidad a 48 kSps. Esto evita que el flujo de datos sea demasiado rápido para ser manejado por el hardware o el software. 
 
+El AGC (Automatic Gain Control) ajusta automáticamente la ganancia de la señal para mantener un nivel de amplitud constante. Se configura con una referencia de 1, una ganancia inicial de 1 y una ganancia máxima de 2. Este bloque es esencial para manejar variaciones en la amplitud de la señal recibida. 
 
-La salida de este procesamiento inicial se guarda temporalmente en un Virtual Sink con el ID de flujo `RX_op2` para su uso posterior. La QT GUI Frequency Sink proporciona una representación visual de la señal en el dominio de frecuencia, mostrando información importante sobre la frecuencia central y el ancho de banda. 
+La señal sincronizada se pasa a través del bloque Symbol Sync, que sincroniza los símbolos de la señal con el reloj del sistema. Este bloque utiliza el detector de error de temporización Mueller y Müller, con muestras por símbolo configuradas en 4 y un ancho de banda del lazo de 62.8 m. El bloque también cuenta con un resamplador interpolante MMSE de 8 tap FIR, lo que garantiza una correcta recuperación de los datos. 
 
+El siguiente bloque es el Costas Loop, que recupera la portadora y corrige cualquier desplazamiento de fase en la señal recibida. Este lazo tiene un ancho de banda de 62.8 m y un orden de 2, lo que permite una recuperación precisa de la portadora y la corrección de la fase. 
 
-El siguiente paso en el procesamiento de la señal es la sincronización de símbolos, realizada por el bloque Symbol Sync. Este bloque utiliza un detector de error de sincronización (Mueller and Mueller), ajusta los parámetros de sincronización, y asegura que los símbolos en la señal recibida estén alineados correctamente. El Costas Loop corrige cualquier desvío de fase en la señal. 
+La señal corregida en fase se decodifica usando el bloque Constellation Decoder, que convierte la señal modulada en BPSK de nuevo a datos binarios. Este bloque es crucial para recuperar los bits originales de la señal modulada. 
 
+A continuación, los datos pasan por el bloque Differential Decoder, que decodifica los datos codificados diferencialmente. Esto asegura que la secuencia original de bits se recupere correctamente, incluso si hubo errores de fase durante la transmisión. 
 
-Para decodificar la señal, se emplean dos bloques: Constellation Decoder, que decodifica la constelación de la señal digital, y Differential Decoder, que realiza la decodificación diferencial con un módulo de 2. Los datos decodificados se almacenan nuevamente en un Virtual Sink con el ID de flujo `RXop2`. 
+El bloque Unpack K Bits desempaqueta los bits de la señal recibida, convirtiéndolos de una representación compacta a una más adecuada para el procesamiento posterior. Este bloque toma bits por byte de entrada y los convierte en 8 bits por byte de salida. 
 
+Los datos desempaquetados pasan por el bloque Correlate Access Code - Tag Stream, que busca un código de acceso específico en la secuencia de bits y etiqueta los paquetes de datos. Este bloque utiliza un código de acceso definido por el usuario y asegura que cada paquete esté correctamente identificado y etiquetado para su posterior procesamiento. 
 
-En la última etapa del procesamiento, los datos son mapeados utilizando un bloque Map que convierte los datos recibidos a un formato adecuado para el procesamiento posterior. El bloque Correlate Access Code - Tag Stream detecta y etiqueta los paquetes en el flujo de datos basados en un código de acceso específico (101010).  
+El siguiente paso es la verificación de la integridad de los paquetes de datos utilizando el bloque Stream CRC32. Este bloque verifica el código CRC32 añadido durante la transmisión para asegurarse de que los datos no han sido corrompidos. Si el CRC coincide, los datos son considerados válidos. 
 
+Finalmente, los datos decodificados y verificados se almacenan en un archivo utilizando el bloque File Sink. Este bloque guarda los datos en un archivo especificado por el usuario, permitiendo su posterior análisis y utilización. 
 
-Los datos etiquetados se reempaquetan en bytes mediante el bloque Repack Bits y su integridad es verificada utilizando el bloque Stream CRC32. Los datos procesados y verificados se guardan finalmente en un archivo especificado por el bloque File Sink. 
-
-
-Adicionalmente, para fines de visualización, los datos se convierten de caracteres sin signo a flotantes usando el bloque UChar to Float, y se muestran en el dominio del tiempo mediante dos bloques QT GUI Time Sink, proporcionando una representación visual detallada de la señal en el dominio del tiempo. 
+Adicionalmente, hay varios bloques QT GUI Sink utilizados para la visualización de la señal en diferentes etapas del procesamiento. Estos bloques permiten observar la señal en el dominio del tiempo y la frecuencia, facilitando la depuración y el análisis del desempeño del receptor. 
 
 
 
